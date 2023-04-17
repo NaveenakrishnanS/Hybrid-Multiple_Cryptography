@@ -20,8 +20,11 @@ def aes_encrypt(message, aeskey, aes_layers):
     cipher = AES.new(aeskey, AES.MODE_GCM)
     nonce = cipher.nonce
     for i in range(aes_layers):
-        aes_ciphertext = cipher.encrypt(message.encode("utf-8"))
-        print("\nAES Ciphertext -",i+1," :" ,aes_ciphertext)
+        if isinstance(message, str):
+            message = message.encode("utf-8")
+        aes_ciphertext = cipher.encrypt(message)
+        print("\nAES Ciphertext -", i+1, ":", aes_ciphertext)
+        message = aes_ciphertext  # set message for next iteration
     return nonce, aes_ciphertext
 
 def rsa_encrypt(aes_ciphertext, publickey):
@@ -51,12 +54,12 @@ def rsa_decrypt(aes_decrypted, privatekey):
 def aes_decrypt(nonce, ciphertext, decryptedkey,aes_layers):
     # Decrypt message using AES decryption
     cipher = AES.new(decryptedkey, AES.MODE_GCM, nonce=nonce)
-    for i in reversed(range(1,aes_layers)):
+    for i in reversed(range(0,aes_layers)):
         aes_decrypted = cipher.decrypt(ciphertext)
+        if(i==0):
+            aes_decrypted = aes_decrypted.decode("utf-8")
         print("\nDecrypted message by AES - ",i+1," :" ,aes_decrypted)
-        if(i == 1):
-            aes_decrypted = cipher.decrypt(ciphertext).decode("utf-8")
-            print("\nDecrypted message by AES - ",i," :", aes_decrypted)
+        ciphertext = aes_decrypted  # set message for next iteration
     return aes_decrypted
 
 
